@@ -1,0 +1,61 @@
+#-------------------------------------------------------------------------
+# Welcome to DevRunner
+#
+# DevRunner is a tool which can store and run actions for
+# for you by providing a layer of abstraction of the commands
+# so you do not have to remember what the setup, parameters,
+# and cmds are required to run the actions.
+#
+# More information please see: http://devrunner
+#
+# Below is an example of how you would define additional
+# parameters to be added to your mvn command to run functional
+# tests.
+#-------------------------------------------------------------------------
+
+apptype: raptor3
+appname: mastercardisoconnserv
+
+unit-test:
+  test_report:
+    report_files: '**/target/surefire-reports/TEST*xml'
+
+functional-test:
+  params:
+    pom:
+      default: '{appname}FunctionalTests/pom.xml'
+    testsuite:
+      default: src/test/resources/suites/mastercard-iso-test-suite.xml
+      values:
+        - large: src/test/resources/suites/mastercard-iso-test-suite.xml
+        - mini: src/test/resources/suites/mastercard-iso-test-suite.xml
+        - small: src/test/resources/suites/mastercard-iso-test-suite.xml
+        - medium: src/test/resources/suites/mastercard-iso-test-suite.xml
+        - all: src/test/resources/suites/mastercard-iso-test-suite.xml
+    port:
+      default: 24789
+    retries:
+      default: 0
+    stage-host:
+      default: 0.0.0.0
+    appProtocol:
+      shortname: ap
+      default: 'https'
+      description: 'Defines the application protocol while executing FT i.e., http'
+
+  pre:
+    cmds:
+      - mvn verify -f mastercardisoconnservFunctionalTests/pom.xml
+
+  run:
+    additional_params:
+      - -DapplicationSuitesize={size}
+      - -DsuiteXmlFile={testsuite}
+      - -DapplicationProtocol={appProtocol}
+      - -DapplicationHostname={stage-host}
+      - -DapplicationPort={port}
+      - -DskipFTs=false
+      - -DskipTests=false
+      - --fail-never
+      - -Dmaven.test.failure.ignore=true
+      - -DJAWS_HOSTNAME={stage-host}
