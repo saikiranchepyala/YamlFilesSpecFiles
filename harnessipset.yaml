@@ -1,0 +1,109 @@
+inputSet:
+  name: "mcusisoconnserv_ipset"
+  tags: {}
+  identifier: "mcusisoconnserv_ipset"
+  description: "mcusisoconnserv input set"
+  orgIdentifier: p_payments
+  projectIdentifier: app_mcusisoconnserv
+  pipeline:
+    identifier: mcusisoconnserv
+    template:
+      templateInputs:
+        stages:
+          - stage:
+              identifier: build_application
+              template:
+                templateInputs:
+                  type: CI
+                  spec:
+                    execution:
+                      steps:
+                        - parallel:
+                            - stepGroup:
+                                identifier: Sonar_Analysis
+                                template:
+                                  templateInputs:
+                                    variables:
+                                      - name: SONARQUBE_TIMEOUT_SECONDS
+                                        type: String
+                                        value: "600"
+                                      - name: SONARQUBE_QUALITY_GATE
+                                        type: String
+                                        value: ""
+                                      - name: SONARQUBE_EXCLUSIONS
+                                        type: String
+                                        value: ""
+                                      - name: SONARQUBE_EXTRA_PARAMETERS
+                                        type: String
+                                        value: ""
+                                      - name: SONARQUBE_JACOCO_XML_REPORTS_PATH
+                                        type: String
+                                        value: "'**/target/site/**/jacoco.xml'"
+                                      - name: SONARQUBE_SCAN_COMMAND
+                                        type: String
+                                        value: "$MAVEN_HOME/bin/mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_HOST -Dsonar.login=$SONARQUBE_TOKEN -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=$SONARQUBE_TIMEOUT_SECONDS -Dsonar.projectKey=$SONARQUBE_PROJECT_KEY -Dsonar.branch.name=$SONARQUBE_BRANCH_NAME -Dsonar.projectDescription=$SONARQUBE_PROJECT_DESCRIPTION -Dsonar.issuesReport.console.enable=true -Dsonar.exclusions=$SONARQUBE_EXCLUSIONS -Dsonar.coverage.jacoco.xmlReportPaths=$SONARQUBE_JACOCO_XML_REPORTS_PATH"
+                                      - name: SONARQUBE_PR_SCAN_COMMAND
+                                        type: String
+                                        value: "$MAVEN_HOME/bin/mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_HOST -Dsonar.login=$SONARQUBE_TOKEN -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=$SONARQUBE_TIMEOUT_SECONDS -Dsonar.projectKey=$SONARQUBE_PROJECT_KEY -Dsonar.projectVersion=$SONARQUBE_PROJECT_VERSION -Dsonar.projectDescription=$SONARQUBE_PROJECT_DESCRIPTION -Dsonar.issuesReport.console.enable=true -Dsonar.exclusions=$SONARQUBE_EXCLUSIONS -Dsonar.coverage.jacoco.xmlReportPaths=$SONARQUBE_JACOCO_XML_REPORTS_PATH -Dsonar.pullrequest.base=$CHANGE_TARGET -Dsonar.pullrequest.branch=$CHANGE_FORK/$CHANGE_BRANCH -Dsonar.pullrequest.github.repository=$GITHUB_REPOSITORY_NAME -Dsonar.pullrequest.key=$CHANGE_ID -Drepository.source.branch=$CHANGE_BRANCH -Drepository.source.user=$CHANGE_FORK"
+          - stage:
+              identifier: Release_Ticket_Creation_And_Valdidation
+              template:
+                templateInputs:
+                  type: CI
+                  variables:
+                    - name: verifier_ph
+                      type: String
+                      value: ""
+                    - name: manager_ph
+                      type: String
+                      value: ""
+        variables:
+          - name: application_name
+            type: String
+            value: mcusisoconnserv
+          - name: application_servicename
+            type: String
+            value: mastercardisoconnservService
+          - name: application_functional_tests_input
+            type: String
+            value: devrunner/dr.py ft -sn ${TE_NAME} -sh ${TE_NAME}.qa.paypal.com --namespace ${NAMESPACE}
+          - name: application_ssl_port
+            type: String
+            value: 8443 
+          - name: maven
+            type: String
+            value: /opt/maven/maven-3.9.2
+          - name: jdk
+            type: String
+            value: /opt/jdk/zulu-jdk-17
+          - name: assembler_args
+            type: String
+            value: ""
+          - name: mvn_args
+            type: String
+            value: install -B -T 2 -DskipTests
+          - name: ut_args
+            type: String
+            value: ""
+          - name: ict_input
+            type: String
+            value: ""
+          - name: GIT_SUBMODULE
+            type: String
+            value: "true"
+          - name: is_batch_app
+            type: String
+            value: "False"
+          - name: testenv_ttl
+            type: String
+            value: 60m
+          - name: notify_user_group_id
+            type: String
+            value: ""
+        properties:
+          ci:
+            codebase:
+              build:
+                type: branch
+                spec:
+                  branch: <+trigger.branch>

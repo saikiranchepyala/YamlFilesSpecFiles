@@ -1,0 +1,110 @@
+pipeline:
+  name: mcusisoconnserv
+  identifier: mcusisoconnserv
+  tags: 
+    repo: "Payment-Networks-R/mastercardisoconnserv"
+    portfolio: "p_payments"
+    pipelinetype: raptor
+  projectIdentifier: app_mcusisoconnserv
+  orgIdentifier: p_payments
+  template:
+    templateRef: account.raptorcipipelinetemplate
+    versionLabel: v1.0.0
+    templateInputs:
+      stages:
+        - stage:
+            identifier: build_application
+            template:
+              templateInputs:
+                type: CI
+                spec:
+                  execution:
+                    steps:
+                      - parallel:
+                        - stepGroup:
+                            identifier: Sonar_Analysis
+                            template:
+                              templateInputs:
+                                variables:
+                                  - name: SONARQUBE_TIMEOUT_SECONDS
+                                    type: String
+                                    value: <+input>.default(600)
+                                  - name: SONARQUBE_QUALITY_GATE
+                                    type: String
+                                    value: <+input>.default()
+                                  - name: SONARQUBE_EXCLUSIONS
+                                    type: String
+                                    value: <+input>.default()
+                                  - name: SONARQUBE_EXTRA_PARAMETERS
+                                    type: String
+                                    value: <+input>.default()
+                                  - name: SONARQUBE_JACOCO_XML_REPORTS_PATH
+                                    type: String
+                                    value: <+input>.default('**/target/site/**/jacoco.xml')
+                                  - name: SONARQUBE_SCAN_COMMAND
+                                    type: String
+                                    value: <+input>.default($MAVEN_HOME/bin/mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_HOST -Dsonar.login=$SONARQUBE_TOKEN -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=$SONARQUBE_TIMEOUT_SECONDS -Dsonar.projectKey=$SONARQUBE_PROJECT_KEY -Dsonar.branch.name=$SONARQUBE_BRANCH_NAME -Dsonar.projectDescription=$SONARQUBE_PROJECT_DESCRIPTION -Dsonar.issuesReport.console.enable=true -Dsonar.exclusions=$SONARQUBE_EXCLUSIONS -Dsonar.coverage.jacoco.xmlReportPaths=$SONARQUBE_JACOCO_XML_REPORTS_PATH)
+                                  - name: SONARQUBE_PR_SCAN_COMMAND
+                                    type: String
+                                    value: <+input>.default($MAVEN_HOME/bin/mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_HOST -Dsonar.login=$SONARQUBE_TOKEN -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=$SONARQUBE_TIMEOUT_SECONDS -Dsonar.projectKey=$SONARQUBE_PROJECT_KEY -Dsonar.projectVersion=$SONARQUBE_PROJECT_VERSION -Dsonar.projectDescription=$SONARQUBE_PROJECT_DESCRIPTION -Dsonar.issuesReport.console.enable=true -Dsonar.exclusions=$SONARQUBE_EXCLUSIONS -Dsonar.coverage.jacoco.xmlReportPaths=$SONARQUBE_JACOCO_XML_REPORTS_PATH -Dsonar.pullrequest.base=$CHANGE_TARGET -Dsonar.pullrequest.branch=$CHANGE_BRANCH -Dsonar.pullrequest.github.repository=$GITHUB_REPOSITORY_NAME -Dsonar.pullrequest.key=$CHANGE_ID -Drepository.source.branch=$CHANGE_BRANCH -Drepository.source.user=$CHANGE_FORK)
+        - stage:
+            identifier: Release_Ticket_Creation_And_Valdidation
+            template:
+              templateInputs:
+                type: CI
+                variables:
+                  - name: verifier_ph
+                    type: String
+                    value: <+input>
+                  - name: manager_ph
+                    type: String
+                    value: <+input>
+      variables:
+        - name: application_name
+          type: String
+          value: <+input>
+        - name: application_servicename
+          type: String
+          value: <+input>
+        - name: application_functional_tests_input
+          type: String
+          value: <+input>
+        - name: application_ssl_port
+          type: String
+          value: <+input>
+        - name: maven
+          type: String
+          value: <+input>.default(/opt/maven/maven-3.9.2).allowedValues(/opt/maven/maven-3.6.1,/opt/maven/maven-3.9.2)
+        - name: jdk
+          type: String
+          value: <+input>.default(/opt/jdk/zulu-jdk-17).allowedValues(/opt/jdk/zulu-jdk-17,/opt/jdk/zulu-jdk-8,/opt/jdk/zulu-jdk-21)
+        - name: mvn_args
+          type: String
+          value: <+input>.default(install -B -T 2 -DskipTests)
+        - name: ut_args
+          type: String
+          value: <+input>
+        - name: assembler_args
+          type: String
+          value: <+input>
+        - name: ict_input
+          type: String
+          value: <+input>
+        - name: GIT_SUBMODULE
+          type: String
+          value: <+input>.default(true).allowedValues(true,false)
+        - name: is_batch_app
+          type: String
+          value: <+input>.default(False).allowedValues(True,False)
+        - name: testenv_ttl
+          type: String
+          value: <+input>.default(60m)
+        - name: notify_user_group_id
+          type: String
+          value: <+input>
+      properties:
+        ci:
+          codebase:
+            connectorRef: org.PaymentNetworksR_Github_Connector
+            repoName: mastercardisoconnserv
+            build: <+input>
