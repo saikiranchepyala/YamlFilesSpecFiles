@@ -1,0 +1,364 @@
+# Welcome to DevRunner
+#
+# DevRunner is a tool which can store and run actions for
+# for you by providing a layer of abstraction of the commands
+# so you do not have to remember what the setup, parameters,
+# and cmds are required to run the actions.
+#
+# More information please see: http://devrunner
+#
+# Below is an example of how you would define additional
+# parameters to be added to your mvn command to run functional
+# tests.
+#-------------------------------------------------------------------------
+
+apptype: raptor3
+appname: mastercardisoconnserv
+
+unit-test:
+  test_report:
+    report_files: '**/target/surefire-reports/TEST*xml'
+
+functional-test:
+  params:
+    pom:
+      default: '{appname}FunctionalTests/pom.xml'
+    testsuite:
+      default: src/test/resources/suites/mastercard-iso-test-suite.xml
+      values:
+        - large: src/test/resources/suites/mastercard-iso-test-suite.xml
+        - mini: src/test/resources/suites/mastercard-iso-test-suite.xml
+        - small: src/test/resources/suites/mastercard-iso-test-suite.xml
+        - medium: src/test/resources/suites/mastercard-iso-test-suite.xml
+        - all: src/test/resources/suites/mastercard-iso-test-suite.xml
+    port:
+      default: 24789
+    retries:
+      default: 0
+    stage-host:
+      default: 0.0.0.0
+    appProtocol:
+      shortname: ap
+      default: 'https'
+      description: 'Defines the application protocol while executing FT i.e., http'
+
+  pre:
+    cmds:
+      - mvn verify -f mastercardisoconnservFunctionalTests/pom.xml
+
+  run:
+    additional_params:
+      - -DapplicationSuitesize={size}
+      - -DsuiteXmlFile={testsuite}
+      - -DapplicationProtocol={appProtocol}
+      - -DapplicationHostname={stage-host}
+      - -DapplicationPort={port}
+      - -DskipFTs=false
+      - -DskipTests=false
+      - --fail-never
+      - -Dmaven.test.failure.ignore=true
+      - -DJAWS_HOSTNAME={stage-host}
+hj said: <?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <parent>
+    <groupId>com.paypal.paymentnetworks</groupId>
+    <artifactId>mastercardisoconnserv</artifactId>
+    <version>3.8.13-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>mastercardisoconnservFunctionalTests</artifactId>
+  <properties>
+    <suiteXmlFile>src/test/resources/suites/mastercard-iso-test-suite.xml</suiteXmlFile>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <skipFTs>true</skipFTs>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.paypal.piivalidator</groupId>
+      <artifactId>PIIValidatorPlatform</artifactId>
+      <version>1.2.3-RELEASE</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>switch-test</artifactId>
+          <groupId>com.paypal.pps</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>axis-wsdl4j</artifactId>
+          <groupId>axis</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>woodstox-core</artifactId>
+          <groupId>com.fasterxml.woodstox</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xercesImpl</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xstream</artifactId>
+          <groupId>com.thoughtworks.xstream</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jaws-common</artifactId>
+          <groupId>com.paypal.test.qi.jaws</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jaws-core</artifactId>
+          <groupId>com.paypal.test.qi.jaws</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.paypal.test.qi.jaws</groupId>
+      <artifactId>jaws-common</artifactId>
+      <version>1.15.9</version>
+    </dependency>
+    <dependency>
+      <groupId>com.paypal.payments.protos</groupId>
+      <artifactId>financial-instrument-protos</artifactId>
+      <version>2.0.6-RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>com.paypal.usf</groupId>
+      <artifactId>commons</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jcl</artifactId>
+      <version>5.3.31</version>
+    </dependency>
+    <dependency>
+      <groupId>com.paypal.pps</groupId>
+      <artifactId>switch-test</artifactId>
+      <version>4.1.17-RELEASE</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>jboss-annotations-api_1.2_spec</artifactId>
+          <groupId>org.jboss.spec.javax.annotation</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
+          <groupId>org.jboss.spec.javax.ws.rs</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>javax.mail</artifactId>
+          <groupId>com.sun.mail</groupId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-all</artifactId>
+        </exclusion>
+        <exclusion>
+          <artifactId>resteasy-client</artifactId>
+          <groupId>org.jboss.resteasy</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>resteasy-jaxrs</artifactId>
+          <groupId>org.jboss.resteasy</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.paypal.issuance.history</groupId>
+      <artifactId>issuance-history-spec</artifactId>
+      <version>1.0.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.7.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.paypal.test.qi.jaws</groupId>
+      <artifactId>GenData</artifactId>
+      <version>1.15.19</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jpos</groupId>
+      <artifactId>jpos</artifactId>
+      <version>1.9.6</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>xml-apis</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xercesImpl</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>bsh</artifactId>
+          <groupId>org.beanshell</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jdbm</artifactId>
+          <groupId>jdbm</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.paypal.test.qi.client</groupId>
+      <artifactId>testframework-testng-client</artifactId>
+      <version>[1.0,)</version>
+    </dependency>
+    <dependency>
+      <groupId>com.paypal.csl</groupId>
+      <artifactId>CSLLibrary</artifactId>
+      <version>7.0.0-RELEASE</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jmockit</groupId>
+          <artifactId>jmockit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.paypal.csl</groupId>
+      <artifactId>CSLClient</artifactId>
+      <version>7.0.14-RELEASE</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xstream</artifactId>
+          <groupId>com.thoughtworks.xstream</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>6.9.10</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>bsh</artifactId>
+          <groupId>org.beanshell</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jackson2-provider</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <version>5.0.7.Final</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.basepom.maven</groupId>
+        <artifactId>duplicate-finder-maven-plugin</artifactId>
+        <configuration>
+          <failBuildInCaseOfDifferentContentConflict>false</failBuildInCaseOfDifferentContentConflict>
+          <failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
+          <failBuildInCaseOfConflict>false</failBuildInCaseOfConflict>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>resource-dependencies</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeArtifactIds>PIIValidatorPlatform</includeArtifactIds>
+              <includes>**\/*.js,**\/*.css</includes>
+              <outputDirectory>target/surefire-reports</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>
+            -XX:+AllowRedefinitionToAddDeleteMethods
+            --custom-providers=customjsse
+            --add-opens=java.base/java.lang=ALL-UNNAMED
+            --add-opens=java.base/java.util=ALL-UNNAMED
+            --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+            --add-opens=java.base/sun.security.validator=ALL-UNNAMED
+            --add-opens=java.base/java.io=ALL-UNNAMED
+            --add-exports=java.xml/jdk.xml.internal=ALL-UNNAMED
+            --add-exports=javax.xml/jdk.xml.internal=ALL-UNNAMED
+          </argLine>
+          <skipTests>${skipFTs}</skipTests>
+          <suiteXmlFiles>
+            <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                  <failOnLowerVersionRule implementation="com.paypal.raptor.plugins.enforcer.rules.FailOnLowerVersionRule">
+                    <excludes>
+                      <exclude>org.testng:testng</exclude>
+                    </excludes>
+                  </failOnLowerVersionRule>
+                </rules>
+            </configuration>
+          </execution>
+          <execution>
+            <id>raptor-enforcer-rules-compile-phase</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>*:*Merged</exclude>
+                  </excludes>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+          <execution>
+            <id>enforce-no-snapshots</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration combine.self="override">
+              <rules>
+                <requireReleaseDeps>
+                  <onlyWhenRelease>true</onlyWhenRelease>
+                  <message>No Snapshots Allowed!</message>
+                </requireReleaseDeps>
+              </rules>
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.paypal.raptor.plugins</groupId>
+            <artifactId>enforcer-plugin-rules</artifactId>
+            <version>${raptor-enforcer.version-range}</version>
+            <scope>compile</scope>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+</project>
